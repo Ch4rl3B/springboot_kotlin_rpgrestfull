@@ -1,5 +1,6 @@
 package com.ch4rl3b.example.restpgdemo.services
 
+import com.ch4rl3b.example.restpgdemo.clases.UserRequest
 import com.ch4rl3b.example.restpgdemo.models.UserModel
 import com.ch4rl3b.example.restpgdemo.repository.UsersRepository
 import org.junit.jupiter.api.AfterEach
@@ -39,4 +40,16 @@ internal class UsersServiceTest {
       assertEquals(0, last.role)
     }
 
+
+    @Test
+    fun testRegisterAdmin(){
+        val userRequest = UserRequest("test", "password")
+        val usersService = UsersService(usersRepository)
+        val saved = usersService.registerAdmin(userRequest)
+        val response = usersRepository.findById(saved.id!!)
+
+        assert(response.isPresent())
+        assertEquals(response.get().username,userRequest.username)
+        assertEquals(response.get().role,0)
+    }
 }
