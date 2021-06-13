@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.dao.DataIntegrityViolationException
 
 
 @SpringBootTest
@@ -51,5 +52,20 @@ internal class UsersServiceTest {
         assert(response.isPresent())
         assertEquals(response.get().username,userRequest.username)
         assertEquals(response.get().role,0)
+    }
+
+    @Test
+    fun testRegisterAdminWithUsernameTaken(){
+        val userRequest = UserRequest("test1", "password")
+        val usersService = UsersService(usersRepository)
+        try {
+            usersService.registerAdmin(userRequest)
+            println("Gone bad way.. it supossed to throw Exception")
+            assert(false)
+        } catch (ex : Exception){
+            println("Gone good way... it returned an Exception")
+            println(ex.message)
+            assert(ex is DataIntegrityViolationException)
+        }
     }
 }
