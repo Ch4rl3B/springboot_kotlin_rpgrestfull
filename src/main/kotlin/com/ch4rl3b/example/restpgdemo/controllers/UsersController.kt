@@ -25,8 +25,17 @@ class UsersController(private val usersService: UsersService) : RestfullControll
         }
     }
 
-    @PostMapping("/admin")
+    @PostMapping
     override fun create(@RequestBody body: UserRequest): ResponseEntity<UserModel> {
+        if(bucket.tryConsume(1L)){
+            return ResponseEntity<UserModel>(usersService.registerUser(body), HttpStatus.CREATED)
+        } else {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build()
+        }
+    }
+
+    @PostMapping("/admin")
+    fun createAdmin(@RequestBody body: UserRequest): ResponseEntity<UserModel> {
         if(bucket.tryConsume(1L)){
             return ResponseEntity<UserModel>(usersService.registerAdmin(body), HttpStatus.CREATED)
         } else {

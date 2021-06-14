@@ -12,7 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.dao.DataIntegrityViolationException
 
 
-@SpringBootTest
+@SpringBootTest()
 internal class UsersServiceTest {
 
     @Autowired
@@ -20,9 +20,8 @@ internal class UsersServiceTest {
 
     @BeforeEach
     fun setUp() {
-        usersRepository.save(UserModel.registerUser("test1", "passwordtest1"))
-        usersRepository.save(UserModel.registerAdmin("admin", "adminpassword"))
-        usersRepository.flush()
+        usersRepository.saveAndFlush(UserModel.registerUser("test1", "password"))
+        usersRepository.saveAndFlush(UserModel.registerAdmin("admin", "password"))
     }
 
     @AfterEach
@@ -60,6 +59,33 @@ internal class UsersServiceTest {
         val usersService = UsersService(usersRepository)
         try {
             usersService.registerAdmin(userRequest)
+            println("Gone bad way.. it supossed to throw Exception")
+            assert(false)
+        } catch (ex : Exception){
+            println("Gone good way... it returned an Exception")
+            println(ex.message)
+            assert(ex is DataIntegrityViolationException)
+        }
+    }
+
+    @Test
+    fun testRegisterUser(){
+        val userRequest = UserRequest("test", "password")
+        val usersService = UsersService(usersRepository)
+        val saved = usersService.registerUser(userRequest)
+        val response = usersRepository.findById(saved.id!!)
+
+        assert(response.isPresent())
+        assertEquals(response.get().username,userRequest.username)
+        assertEquals(response.get().role,1)
+    }
+
+    @Test
+    fun testRegisterUserWithUsernameTaken(){
+        val userRequest = UserRequest("test1", "password")
+        val usersService = UsersService(usersRepository)
+        try {
+            usersService.registerUser(userRequest)
             println("Gone bad way.. it supossed to throw Exception")
             assert(false)
         } catch (ex : Exception){
