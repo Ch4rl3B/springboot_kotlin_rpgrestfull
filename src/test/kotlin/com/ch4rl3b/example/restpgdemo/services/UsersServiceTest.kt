@@ -5,6 +5,7 @@ import com.ch4rl3b.example.restpgdemo.models.UserModel
 import com.ch4rl3b.example.restpgdemo.repository.UsersRepository
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -93,5 +94,16 @@ internal class UsersServiceTest {
             println(ex.message)
             assert(ex is DataIntegrityViolationException)
         }
+    }
+
+    @Test
+    fun updateUser(){
+        val usersService = UsersService(usersRepository)
+        val original = usersService.findAll()[0]
+        val updated = usersService.updateUser(original.copy(username = "newUsername"))
+        assertEquals(original.id, updated.id)
+        assertEquals(original.password, updated.password)
+        assertEquals(original.role, updated.role)
+        assertNotEquals(original.username, updated.username)
     }
 }

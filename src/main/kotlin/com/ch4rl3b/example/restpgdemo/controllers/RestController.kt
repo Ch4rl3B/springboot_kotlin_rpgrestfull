@@ -27,4 +27,5 @@ abstract class RestfullController<T, E> {
 
     abstract fun fetchAll(request : HttpServletRequest) : ResponseEntity<List<T>>
     abstract fun create(@RequestBody body : E) : ResponseEntity<T>
+    abstract fun update(@RequestBody body : T) : ResponseEntity<T>
 }

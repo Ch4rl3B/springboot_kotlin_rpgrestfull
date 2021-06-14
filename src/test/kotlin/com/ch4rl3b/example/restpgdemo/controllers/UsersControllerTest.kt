@@ -96,7 +96,7 @@ internal class UsersControllerTest{
      * Client needs an endpoint for registering a normal user that will be a player
      */
     @Test
-    @DisplayName("Register a new player")
+    @DisplayName("Register a new normal user")
     fun testRegisterNewPlayer(){
         val userRequest = UserRequest("user", "qwerty")
         `when`(usersServiceMock.registerUser(any(UserRequest::class.java))).thenReturn(UserModel.registerUser(userRequest.username, userRequest.password))
@@ -114,4 +114,48 @@ internal class UsersControllerTest{
                 .andExpect(jsonPath("$.id").exists())
     }
 
+
+    /**
+     * Client needs an endpoint for updating a username for normal Users
+     */
+    @Test
+    @DisplayName("Update a registered normal user")
+    fun testUpdatePlayer(){
+        val userRequest = UserModel.registerUser("user", "qwerty")
+        `when`(usersServiceMock.updateUser(any(UserModel::class.java))).thenReturn(userRequest.copy(username = "newUsername"))
+
+        val objectMapper = ObjectMapper()
+        val jsonBody = objectMapper.writeValueAsString(userRequest.copy(username = "newUsername"))
+
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonBody)
+                .accept(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk())
+                .andExpect(jsonPath("$.role").value(1))
+                .andExpect(jsonPath("$.username").value("newUsername"))
+                .andExpect(jsonPath("$.id").value(userRequest.id))
+    }
+
+    /**
+     * Client needs an endpoint for updating a username for Admins
+     */
+    @Test
+    @DisplayName("Update a registered Admins")
+    fun testUpdateAdmin(){
+        val userRequest = UserModel.registerAdmin("user", "qwerty")
+        `when`(usersServiceMock.updateUser(any(UserModel::class.java))).thenReturn(userRequest.copy(username = "newUsername"))
+
+        val objectMapper = ObjectMapper()
+        val jsonBody = objectMapper.writeValueAsString(userRequest.copy(username = "newUsername"))
+
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/users/admin")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonBody)
+                .accept(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk())
+                .andExpect(jsonPath("$.role").value(0))
+                .andExpect(jsonPath("$.username").value("newUsername"))
+                .andExpect(jsonPath("$.id").value(userRequest.id))
+    }
 }

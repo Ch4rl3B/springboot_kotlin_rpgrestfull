@@ -43,4 +43,22 @@ class UsersController(private val usersService: UsersService) : RestfullControll
         }
     }
 
+    @PutMapping
+    override fun update(body: UserModel): ResponseEntity<UserModel> {
+        if(bucket.tryConsume(1L)){
+            return ResponseEntity<UserModel>(usersService.updateUser(body), HttpStatus.OK)
+        } else {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build()
+        }
+    }
+
+    @PutMapping("/admin")
+    fun updateAdmin(body: UserModel): ResponseEntity<UserModel> {
+        if(bucket.tryConsume(1L)){
+            return ResponseEntity<UserModel>(usersService.updateUser(body), HttpStatus.OK)
+        } else {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build()
+        }
+    }
+
 }
